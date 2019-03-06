@@ -1,0 +1,16 @@
+c6736b698a4a853163fc13284dfab82b *DESCRIPTION
+a159631262fafc5d1910ee337e55563e *LICENSE
+f7860cd46d002582c4062da36b3fe139 *NAMESPACE
+277088ee607f8067ebc8469a95d4e8c6 *R/note_in_html.R
+84e7ea7888daef4909463d5cf0c256a7 *R/note_in_md_pdf.R
+f42f4c859f64126283434b82edaf33e0 *R/note_in_md_word.R
+73ff938318a7e81c7e4198f604f978f4 *README.md
+f7013b31cab1a3992660da67dc27e653 *build/vignette.rds
+57cc6609f9ac99623d6b895ac3075c7f *inst/doc/notemd-vignette.R
+9aa0f795206f6a874cc1e6668fd92e87 *inst/doc/notemd-vignette.Rmd
+903ca0ace63263a90b1273540a651512 *inst/doc/notemd-vignette.html
+502a5f8dd6ba90060101596366cb7d58 *man/figures/README-pressure-1.png
+957201bde39e4c6335e935973c706fc1 *man/note_in_html.Rd
+e6badad45286f4bdc68fd30c505e1287 *man/note_in_md_pdf.Rd
+d577a35b72378321b2144733454366c0 *man/note_in_md_word.Rd
+9aa0f795206f6a874cc1e6668fd92e87 *vignettes/notemd-vignette.Rmd

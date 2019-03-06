@@ -1,0 +1,161 @@
+---
+title: "noteMD"
+author: "Jiena McLellan"
+date: "2019-02-22"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Introduction
+
+`noteMD` package is an R package that print text from shiny ui (support markdown syntax) into pdf or word reports!This package works as a widget for `shiny` apps and `rmarkdown` reports! 
+
+By using this package, user need to have a shiny app and simply do following steps to insert a text area and interact with (pdf or word) reports.
+
+* Step 1: create a textarea in shiny ui: `tags$textarea( "Please using any **markdown** syntax!", id = 'markdowninput', rows = 3, style = 'width:100%;')`, note that the id of this tag is `markdowninput`. 
+
+* Step 2: insert an html output (as a preview) in a shiny app, use `output$htmlmarkdown = reactive({note_in_html(input$markdowninput) })` , then put `htmlOutput('htmlmarkdown')` in the shiny ui. 
+
+* Step 3: if your report is in pdf, put `note_in_md_pdf(input$markdowninput)` in an R chunk (whereever you want to insert the text); if your report is in word, put `note_in_md_word(input$markdowninput)` in an R chunk!
+
+### Example 
+
+This is code for `app.R`, please note that since this project is to interact with `Rmarkdown` outputs (reports), the `note_in_md_pdf` and `note_in_md_word` functions should be used in `Rmarkdonw` part of shiny app. 
+
+app.R code: 
+
+```
+library(shiny)
+library(noteMD)
+library(knitr)  
+library(rmarkdown)
+ui <- fluidPage(
+  fluidRow(
+    column(12,
+           helpText("Note: Any comments made in the box will be printed if you download the summary report.") ),
+    column(12,
+           tags$textarea(
+             "Please using any **markdown** syntax!",
+             id    = 'markdowninput',
+             rows  = 3,
+             style = 'width:100%;')) ),
+  helpText("Preview:"),
+  htmlOutput('htmlmarkdown')
+)
+
+# Define server logic required to draw a histogram
+server <- function(input, output) {
+  
+  output$htmlmarkdown = reactive({
+    note_in_html(input$markdowninput)
+  })
+  
+  output$describe_download = downloadHandler(
+    filename<- function(){
+      paste("Summary",Sys.Date(),switch(
+        input$format, PDF = '.pdf', Word = '.docx'
+      ),sep = "")
+    },
+    
+    content = function(file) {
+      if (input$format=="PDF"){
+        #### Progressing indicator
+        withProgress(message = 'Download in progress',
+                     detail = 'This may take a while...', value = 0, {
+                       for (i in 1:15) {
+                         incProgress(1/15)
+                         Sys.sleep(0.01)
+                       }
+                       
+                       ## End of progression
+                       src <- normalizePath('summary_report.Rmd')
+                       
+                       # temporarily switch to the temp dir, in case you do not have write
+                       # permission to the current working directory
+                       owd <- setwd(tempdir())
+                       on.exit(setwd(owd))
+                       file.copy(src, 'summary_report.Rmd', overwrite = TRUE)
+                       
+                       library(rmarkdown)
+                       out <- render('summary_report.Rmd', pdf_document())
+                       file.rename(out, file)
+                       
+                     })
+      }else{
+        withProgress(message = 'Download in progress',
+                     detail = 'This may take a while...', value = 0, {
+                       for (i in 1:15) {
+                         incProgress(1/15)
+                         Sys.sleep(0.01)
+                       }
+                       
+                       ## End of progression
+                       src <- normalizePath('summary_report_word.Rmd')
+                       
+                       # temporarily switch to the temp dir, in case you do not have write
+                       # permission to the current working directory
+                       owd <- setwd(tempdir())
+                       on.exit(setwd(owd))
+                       file.copy(src, 'summary_report_word.Rmd', overwrite = TRUE)
+                       
+                       library(rmarkdown)
+                       out <- render('summary_report_word.Rmd', word_document())
+                       file.rename(out, file)
+                     })
+      }
+      
+    })
+  
+  
+}
+
+# Run the application 
+shinyApp(ui = ui, server = server)
+```
+
+Note: when running this example, please put `summary_report.Rmd` and `summary_report_word.Rmd` in the same direction as the shiny `app.R`.
+
+* For PDF output:
+
+summary_report.Rmd code: 
+
+```
+---
+title: "Summary Report"
+author: "User Name"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: pdf_document
+---
+
+### Put this following code in an R chunk
+note_in_md_pdf(input$markdowninput)
+
+```
+
+* For word.doc output: 
+
+summary_report_word.Rmd code: 
+
+```
+---
+title: "Summary Report"
+author: "User Name"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: word_document
+---
+
+### Put this following code in an R chunk
+note_in_md_word(input$markdowninput)
+
+```
+
